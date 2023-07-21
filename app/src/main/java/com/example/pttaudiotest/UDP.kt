@@ -21,7 +21,17 @@ class UDP {
     fun init() {
         socket = DatagramSocket()
         socket!!.broadcast = true
+
+        codec.decoderInit(
+            sampleRate = Constants.SampleRate._48000(),
+            channels = Constants.Channels.mono()
+        )
+
         running = true
+    }
+
+    fun reset() {
+        audios = emptyArray<ByteArray>()
     }
 
     fun ping() {
@@ -41,11 +51,11 @@ class UDP {
     private fun pingLoop() {
         while (running) {
             try {
-                val ping = byteArrayOf(99.toByte(), 0.toByte(), 0.toByte(), 0.toByte())
+                val ping = byteArrayOf(23.toByte(), 0.toByte(), 0.toByte(), 0.toByte())
                 val sendPacket =
                     DatagramPacket(ping, ping.size, InetAddress.getByName(remoteHost), remotePort)
                 socket?.send(sendPacket)
-                println("UDP PING... ")
+                //println("UDP PING... ")
                 Thread.sleep(1000 * 10)
 
             } catch (e: Exception) {
@@ -64,7 +74,7 @@ class UDP {
                 socket?.receive(packet)
 
                 if (packet.length < 10) {
-                    println("UDP ping? " + packet.data.slice(0 until packet.length).toByteArray().contentToString())
+                    //println("UDP ping? " + packet.data.slice(0 until packet.length).toByteArray().contentToString())
                     continue
                 }
 
@@ -72,7 +82,7 @@ class UDP {
                 val header = packet.data.slice(0 until headerLen).toByteArray()
                 val payload = packet.data.slice(headerLen until packet.length).toByteArray()
 
-                println("UDP " + header.contentToString() + ":" + payload.contentToString())
+                //println("UDP " + header.contentToString())
 
                 val decoded =
                     codec.decode(
@@ -96,5 +106,9 @@ class UDP {
     fun end() {
         running = false
         socket?.close()
+    }
+
+    fun isRunning(): Boolean {
+        return running
     }
 }
