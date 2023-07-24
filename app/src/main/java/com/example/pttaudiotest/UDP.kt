@@ -7,13 +7,14 @@ import java.net.InetAddress
 import com.theeasiestway.opus.Constants
 import com.theeasiestway.opus.Opus
 
+
 class UDP {
     var audios = emptyArray<ByteArray>()
 
     private val remoteHost = "190.2.45.173"//""172.31.120.230"//"127.0.0.1"
     private val remotePort = 64749 //64739
 
-    private val codec = Opus()
+    private var codec = Opus()
     private var running = false
     private val buffer = ByteArray(2048)
     private var socket: DatagramSocket? = null
@@ -32,6 +33,14 @@ class UDP {
 
     fun reset() {
         audios = emptyArray<ByteArray>()
+        codec.decoderRelease()
+
+        codec = Opus()
+        codec.decoderInit(
+            sampleRate = Constants.SampleRate._48000(),
+            channels = Constants.Channels.mono()
+        )
+
     }
 
     fun ping() {
@@ -67,6 +76,7 @@ class UDP {
     }
 
     private fun receiveLoop() {
+        var secAnt:Byte = 0
         while (running) {
             try {
                 val packet = DatagramPacket(buffer, buffer.size)
@@ -81,8 +91,10 @@ class UDP {
                 val headerLen = packet.length - 40
                 val header = packet.data.slice(0 until headerLen).toByteArray()
                 val payload = packet.data.slice(headerLen until packet.length).toByteArray()
+                val sec = header[ header.size -2]
 
-                //println("UDP " + header.contentToString())
+                println("UDP dif"+(sec-secAnt).toString() +" seq:"+ sec.toString()+ ":" + header.contentToString())
+                secAnt = sec
 
                 val decoded =
                     codec.decode(

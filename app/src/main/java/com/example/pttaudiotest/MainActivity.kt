@@ -154,7 +154,7 @@ class MainActivity : ComponentActivity() {
 
             while (udp.isRunning()) {
                 val audioSize = udp.audios.size
-                if (audioSize < 10) { //buffer inicial
+                if (audioSize < 50) { //buffer inicial
                     continue
                 }
 
