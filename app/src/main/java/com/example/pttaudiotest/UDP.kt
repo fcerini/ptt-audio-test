@@ -41,6 +41,8 @@ class UDP {
             channels = Constants.Channels.mono()
         )
 
+        descartaDescarta = 0
+
     }
 
     fun ping() {
@@ -74,9 +76,10 @@ class UDP {
 
         }
     }
+    private var secAnt: Byte = 0
+    private var descartaDescarta = 0
 
     private fun receiveLoop() {
-        var secAnt:Byte = 0
         while (running) {
             try {
                 val packet = DatagramPacket(buffer, buffer.size)
@@ -91,15 +94,22 @@ class UDP {
                 val headerLen = packet.length - 40
                 val header = packet.data.slice(0 until headerLen).toByteArray()
                 val payload = packet.data.slice(headerLen until packet.length).toByteArray()
-                val sec = header[ header.size -2]
+                val sec = header[header.size - 2]
 
-                println("UDP dif"+(sec-secAnt).toString() +" seq:"+ sec.toString()+ ":" + header.contentToString())
+                println("UDP dif" + (sec - secAnt).toString() + " seq:" + sec.toString() + ":" + header.contentToString())
                 secAnt = sec
 
+                descartaDescarta++
+                //if (descartaDescarta in listOf(1,2,3,4,5,6,7,8,9,10,12,14,16)){
+                if (descartaDescarta < 100 && descartaDescarta % 2 == 0){
+                    println("UDP descarta Descartá")
+                    continue
+                }
                 val decoded =
                     codec.decode(
                         bytes = payload,
-                        frameSize = Constants.FrameSize._1920()
+                        frameSize = Constants.FrameSize._1920(),
+                        0
                     )
 
                 if (decoded != null) {
