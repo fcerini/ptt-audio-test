@@ -101,7 +101,7 @@ class UDP {
 
                 descartaDescarta++
                 //if (descartaDescarta in listOf(1,2,3,4,5,6,7,8,9,10,12,14,16)){
-                if (descartaDescarta < 100 && descartaDescarta % 2 == 0){
+                if (descartaDescarta < -1 && descartaDescarta % 2 == 0){
                     println("UDP descarta Descartá")
                     continue
                 }
