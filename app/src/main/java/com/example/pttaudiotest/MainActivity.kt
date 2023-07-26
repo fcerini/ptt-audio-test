@@ -18,6 +18,9 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.sp
 import com.example.pttaudiotest.ui.theme.PttAudioTestTheme
 
+import kotlin.experimental.and
+import kotlin.math.sin
+
 class MainActivity : ComponentActivity() {
     private var udp = UDP()
 
@@ -44,6 +47,8 @@ class MainActivity : ComponentActivity() {
         udp.init()
         udp.ping()
         udp.receive()
+
+        genTone()
 
         Thread(Runnable {
             Thread.sleep(500)
@@ -88,6 +93,28 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    private val duration = 1
+    private val sampleRate = 48000
+    private val numSamples = duration * sampleRate
+    private val sample = DoubleArray(numSamples)
+    private val generatedSnd = ByteArray(2 * numSamples)
+    private fun genTone() {
+        for (i in 0 until numSamples) {
+            val freqOfTone = 400.0
+            sample[i] =
+                sin( Math.PI * i / (sampleRate / freqOfTone))
+        }
+        var idx = 0
+        for (dVal in sample) {
+            val `val` = (dVal * 32767).toInt().toShort()
+            generatedSnd[idx++] = `val`.and(0x00ff).toByte()
+            generatedSnd[idx++] = `val`.and(0xff00 ushr 8).toByte()
+        }
+    }
+
+    private fun playSound() {
+        audioTrack.write(generatedSnd, 0, generatedSnd.size)
+    }
 
     private fun initAudio() {
         val sampleRate = 48000
@@ -122,6 +149,8 @@ class MainActivity : ComponentActivity() {
     private fun reset() {
         udp.reset()
         lastAudioSize = 0
+        initAudio()
+        playSound()
     }
 
     private fun replay() {

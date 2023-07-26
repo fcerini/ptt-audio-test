@@ -11,12 +11,11 @@ import com.theeasiestway.opus.Opus
 class UDP {
     var audios = emptyArray<ByteArray>()
 
-    private val remoteHost = "190.2.45.173"//""172.31.120.230"//"127.0.0.1"
+    private val remoteHost = "190.2.45.173" //"190.2.45.173" "172.31.120.230" "127.0.0.1"
     private val remotePort = 64749 //64739
 
     private var codec = Opus()
     private var running = false
-    private val buffer = ByteArray(2048)
     private var socket: DatagramSocket? = null
 
     fun init() {
@@ -82,6 +81,7 @@ class UDP {
     private fun receiveLoop() {
         while (running) {
             try {
+                val buffer = ByteArray(1024)
                 val packet = DatagramPacket(buffer, buffer.size)
 
                 socket?.receive(packet)
@@ -96,7 +96,7 @@ class UDP {
                 val payload = packet.data.slice(headerLen until packet.length).toByteArray()
                 val sec = header[header.size - 2]
 
-                println("UDP dif" + (sec - secAnt).toString() + " seq:" + sec.toString() + ":" + header.contentToString())
+                val dif = (sec - secAnt)
                 secAnt = sec
 
                 descartaDescarta++
@@ -114,6 +114,11 @@ class UDP {
 
                 if (decoded != null) {
                     audios += decoded
+                    if (dif > 4){
+                        println("SEC ERROR DIF" + dif.toString())
+                    }
+                    println("SEC:" + sec.toString() + " DIF" + dif.toString() + " PCM (" +decoded.size+")")
+                    println( decoded.contentToString())
                 } else {
                     println("UDP ERR decoded = null!!")
                 }
