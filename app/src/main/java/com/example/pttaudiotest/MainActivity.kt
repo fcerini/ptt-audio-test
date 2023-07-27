@@ -100,7 +100,7 @@ class MainActivity : ComponentActivity() {
     private val generatedSnd = ByteArray(2 * numSamples)
     private fun genTone() {
         for (i in 0 until numSamples) {
-            val freqOfTone = 400.0
+            val freqOfTone = 300.0
             sample[i] =
                 sin( Math.PI * i / (sampleRate / freqOfTone))
         }
@@ -155,18 +155,18 @@ class MainActivity : ComponentActivity() {
 
     private fun replay() {
         try {
-            val audioSize = udp.audios.size
-            val nuevosAudios = udp.audios.sliceArray(0 until audioSize)
+            if (udp.audios.isEmpty()){
+                return
+            }
+
+            var nuevosAudios = byteArrayOf()
+            for (element in udp.audios) {
+                nuevosAudios = nuevosAudios.plus(element)
+            }
 
             replay = true
-            for (element in nuevosAudios) {
-                Thread.sleep(20)
-                if (play) {
-                    replay = false
-                    return
-                }
-                audioTrack.write(element, 0, element.size)
-            }
+            audioTrack.write(nuevosAudios, 0, nuevosAudios.size)
+
         } catch (e: Exception) {
             println("ERR testAudio" + e.message)
         }
